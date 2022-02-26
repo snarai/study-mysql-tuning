@@ -1,0 +1,61 @@
+version: '3.8'
+
+services:
+    perl:
+#      image: perl:5.24.0
+      build:
+        context: ./docker/app
+        dockerfile: Dockerfile
+#      working_dir: "/usr/src/myapp"
+#      entrypoint:
+#        - "/usr/local/bin/perl"
+#      ports:
+#        - "80:80"
+      links:
+        - db
+      depends_on:
+        - db
+#      environment:
+#        ENV: production
+#        MYSQL_HOST: db
+#        MYSQL_PORT: 3306
+#        MYSQL_USER: docker
+#        MYSQL_PASS: docker
+      volumes:
+        - ./docker/app/www:/var/www
+      # privileged: true
+      tty: true
+    db:
+        image: mysql:8.0
+        container_name: mysql-tuning
+        environment:
+            MYSQL_ROOT_PASSWORD: root
+            MYSQL_DATABASE: database
+            MYSQL_USER: docker
+            MYSQL_PASSWORD: docker
+            TZ: 'Asia/Tokyo'
+        command: mysqld --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci
+        volumes:
+            - ./docker/db/data:/var/lib/mysql
+            - ./docker/db/my.cnf:/etc/mysql/conf.d/my.cnf
+#             - ./docker/db/sql:/docker-entrypoint-initdb.d
+        ports:
+            - 3306:3306
+    db-slave:
+        image: mysql:8.0
+        container_name: mysql-tuning-slave
+        environment:
+            MYSQL_ROOT_PASSWORD: root
+            MYSQL_DATABASE: database
+            MYSQL_USER: docker
+            MYSQL_PASSWORD: docker
+            TZ: 'Asia/Tokyo'
+        command: mysqld --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci
+        volumes:
+            - ./docker/db-slave/data:/var/lib/mysql
+            - ./docker/db-slave/my.cnf:/etc/mysql/conf.d/my.cnf
+#             - ./docker/db/sql:/docker-entrypoint-initdb.d
+        ports:
+            - 3307:3307
+
+
