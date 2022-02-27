@@ -24,9 +24,11 @@ services:
       volumes:
         - ./docker/app/www:/var/www
       # privileged: true
+      networks:
+        - demo-network
       tty: true
     db:
-        image: mysql:8.0
+        image: mysql:5.7
         container_name: mysql-tuning
         environment:
             MYSQL_ROOT_PASSWORD: root
@@ -37,12 +39,14 @@ services:
         command: mysqld --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci
         volumes:
             - ./docker/db/data:/var/lib/mysql
-            - ./docker/db/my.cnf:/etc/mysql/conf.d/my.cnf
+            - ./docker/db/my.cnf:/etc/mysql/my.cnf
 #             - ./docker/db/sql:/docker-entrypoint-initdb.d
+        networks:
+            - demo-network
         ports:
             - 3306:3306
     db-slave:
-        image: mysql:8.0
+        image: mysql:5.7
         container_name: mysql-tuning-slave
         environment:
             MYSQL_ROOT_PASSWORD: root
@@ -53,9 +57,13 @@ services:
         command: mysqld --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci
         volumes:
             - ./docker/db-slave/data:/var/lib/mysql
-            - ./docker/db-slave/my.cnf:/etc/mysql/conf.d/my.cnf
+            - ./docker/db-slave/my.cnf:/etc/mysql/my.cnf
 #             - ./docker/db/sql:/docker-entrypoint-initdb.d
+        networks:
+            - demo-network
         ports:
             - 3307:3307
 
-
+networks:
+  demo-network:
+    driver: bridge
